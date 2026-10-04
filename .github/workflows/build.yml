@@ -1,0 +1,38 @@
+name: Build Android APK
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set Up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Ekstrak ZIP dan Rakit APK
+        run: |
+          # 1. Mengekstrak file zip yang Anda upload
+          unzip -q *.zip
+          
+          # 2. Mencari otomatis di mana letak folder mesinnya (gradle)
+          GRADLE_DIR=$(dirname "$(find . -name gradlew | head -n 1)")
+          cd "$GRADLE_DIR"
+          
+          # 3. Merakit aplikasi
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload Hasil APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: Auralis-APK
+          path: ./**/*.apk
